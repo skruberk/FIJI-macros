@@ -18,34 +18,28 @@ function processFolder(input) {
     }
 }
 
-function processFile(input, output2, file) {
+function processFile(input, output, file) {
+    // Disable Bio-Formats Importer dialog
     setBatchMode(true);
     run("Bio-Formats Importer", "open=[" + input + file + "] autoscale color_mode=Default view=Hyperstack stack_order=XYCZT");
     
     title = getTitle();
     title2 = substring(title, 0, lastIndexOf(title, "."));
-    output2 = output + title2;
-    File.makeDirectory(output2); // this part makes the parent folder for each image
     
     run("Split Channels");
     two = "C2-" + title;
     one = "C1-" + title;
     
     selectWindow("C2-" + title);
-    saveAs("tiff", output2 + File.separator + "C2-" + title);
-    C2 = output2 + "C2";
-    File.makeDirectory(C2); // this part makes the folder for each channel
-    run("Image Sequence...", "select=" + C2 + " dir=" + C2 + " format=TIFF name=C2_"); // this writes to that directory
+    saveAs("tiff", output + File.separator + "C2-" + title2 + ".tif");
     
     selectWindow("C1-" + title);
-    saveAs("tiff", output2 + File.separator + "C1-" + title);
-    C1 = output2 + "C1";
-    File.makeDirectory(C1);
-    run("Image Sequence...", "select=" + C1 + " dir=" + C1 + " format=TIFF name=C1_"); // this writes to that directory
+    saveAs("tiff", output + File.separator + "C1-" + title2 + ".tif");
     
-    print(output2);
-    close(file);
+    print(output);
+    close();
+    setBatchMode(false);
 }
 
 // setBatchMode(false);
-run("Close");
+run("Close All");
