@@ -1,0 +1,27 @@
+//Macro in Fiji for translating from manually-measured shifts:
+//fix registration issues on iSIM scope, adjusts mCherry channel 
+// Realigns xy in each channel and leaves as separate images
+
+// Split the image into separate channels
+run("Split Channels");
+windowTitles = getList("window.titles");
+
+// Loop through the windows to find one that starts with "C2-"
+for (i = 0; i < windowTitles.length; i++) {
+    if (startsWith(windowTitles[i], "C2-")) {
+        selectWindow(windowTitles[i]); // Select the matching window
+        break; // Exit the loop once the window is found
+    }
+}
+
+originalmCh = getImageID(); // Get the ID of the selected image
+
+// Define the transformation parameters
+dx = -6.46956; // Translation in the x direction (left)
+dy = 6.52174;  // Translation in the y direction (down)
+
+// Apply the transformation
+run("Translate...", "x=" + dx + " y=" + dy);
+
+//  rename the transformed image
+rename("transformed");
