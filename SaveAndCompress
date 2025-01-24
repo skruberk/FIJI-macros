@@ -1,0 +1,41 @@
+//runs through subdirectories and save as compressed files and leaves them open 
+input = getDirectory("Choose an input directory");
+output = getDirectory("Choose an output directory");
+
+processFolder(input);
+
+function processFolder(input) {
+    list = getFileList(input);
+    for (i = 0; i < list.length; i++) {
+        if (endsWith(list[i], ".dv")) { // Process only .dv files put .ometiff here or whatever the extension is
+            processFile(input, output, list[i]);
+        } else if (endsWith(list[i], "/") && !matches(output, ".*" + substring(list[i], 0, lengthOf(list[i]) - 1) + ".*")) {
+            // Recursively process subfolders
+            processFolder("" + input + list[i]);
+        } else {
+            // Log for files
+            print("Skipping: " + input + list[i]);
+        }
+    }
+}
+
+function processFile(input, output, file) {
+    // Open the file using Bio-Formats Importer you can match your settings here 
+    run("Bio-Formats Importer", "open=[" + input + file + "] autoscale color_mode=Default view=Hyperstack stack_order=XYCZT");
+    
+    // get title of the currently open image and remove the .dv extension
+    title = getTitle();
+    outputFilePath = output + File.separator + substring(title, 0, lengthOf(title) - 3) + ".tif"; // Remove .dv and add .tif 
+    //if it's ometif then change 3 to 6
+
+    // Save the image as TIFF with LZW compression
+    run("Bio-Formats Exporter", "save=[" + outputFilePath + "] export compression=LZW");
+
+    // Close the image
+    //close();
+
+    print("Processed and compressed: " + outputFilePath);
+}
+
+// Close all open images and reset 
+//run("Close All");
