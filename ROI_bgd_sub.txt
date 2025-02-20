@@ -1,0 +1,28 @@
+//===================================================================
+//  This macro measures the same region of interest in each slice of a stack and subtracts the mean plus
+//  specified standard deviation of the mean from each corresponding slice.  It is useful for situations where
+//  there is background intensity changing over time due to something like a flickering light source and you
+//  want the stack's background to be uniform.  It may not be appropriate for situations where precise intensity
+//  measurements will be made that should be uniform through the stack.  Subtracting one constant from the
+//  entire stack is likely better.
+//  To use, put a ROI over a region that is background in all slices.  (Choose the ROI on a maximum pixel
+//  projection if features to assure only bg pixels are included.)  Run the macro.
+//
+macro 'Subtract background based on ROI'{
+  n = 0;  // this is the number of standard deviations to add to the mean bg to subtract
+//  checkCurrentVersion();
+  image_to_process = getImageID();
+  run("Set Measurements...", "  mean  standard  redirect=None decimal=5");
+  run("Plot Z-axis Profile");    
+  run("Close");
+  selectImage(image_to_process);
+  run("Select All");
+  for (i=1; i<=nSlices; i++){
+    bgmean=getResult("Mean",(i-1)) + n*getResult("StdDev",(i-1));
+    run("Set Slice...", "slice="+i);
+    run("Subtract...", "slice value="+bgmean);
+  } // for loop
+  run("Select None");
+  run("Min...", "value=0 stack");
+  resetMinAndMax();
+} // Subtract background based on ROI
